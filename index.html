@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora e Relatório de Serviço por Hora</title>
+    <style>
+        /* Estilos básicos para o visual */
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 0 auto 20px auto;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="number"], input[type="time"], input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .buttons-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        button {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        #btnCalcular {
+            background-color: #007bff;
+            color: white;
+        }
+        #btnCalcular:hover {
+            background-color: #0056b3;
+        }
+        #btnLimpar {
+            background-color: #dc3545;
+            color: white;
+        }
+        #btnLimpar:hover {
+            background-color: #c82333;
+        }
+        #btnGerarRelatorio {
+            background-color: #28a745;
+            color: white;
+        }
+        #btnGerarRelatorio:hover {
+            background-color: #1e7e34;
+        }
+        
+        /* Área de Resultados e Relatório */
+        #duracao, #resultado {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        #resultado {
+            border: 2px solid #28a745;
+            background-color: #e2f0e8;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        #relatorio {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #007bff;
+            border-radius: 8px;
+            background-color: #eaf4ff;
+        }
+        #relatorio h3 {
+            margin-top: 0;
+            color: #007bff;
+            text-align: center;
+            border-bottom: 1px solid #007bff;
+            padding-bottom: 10px;
+        }
+        #relatorio p {
+            font-size: 1.1em;
+            margin: 10px 0;
+        }
+        .label-relatorio {
+            font-weight: bold;
+            display: inline-block;
+            width: 150px; /* Alinha o conteúdo */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Calculadora de Serviço por Hora</h2>
+
+        <label for="servicoPrestado">Serviço Prestado:</label>
+        <input type="text" id="servicoPrestado" value="Desenvolvimento de Landing Page">
+
+        <label for="valorHora">Valor de 1 Hora (R\$):</label>
+        <input type="number" id="valorHora" value="150.00" step="0.01" min="0">
+
+        <label for="horaInicio">Hora de Início:</label>
+        <input type="time" id="horaInicio" value="18:50">
+
+        <label for="horaFim">Hora de Fim:</label>
+        <input type="time" id="horaFim" value="20:20">
+
+        <div class="buttons-group">
+            <button id="btnCalcular" onclick="calcularValor()">Calcular Valor</button>
+            <button id="btnLimpar" onclick="limparDados()">Limpar Dados</button>
+        </div>
+
+        <div id="duracao"></div>
+        <div id="resultado">Aguardando cálculo...</div>
+        
+        <button id="btnGerarRelatorio" onclick="gerarRelatorio()">Gerar Relatório de Cobrança</button>
+
+    </div>
+    
+    <div class="container" id="relatorioContainer">
+        <div id="relatorio">
+            <h3>Relatório de Cobrança</h3>
+            <p>Preencha os dados e clique em "Gerar Relatório de Cobrança" para visualizar o resumo.</p>
+        </div>
+    </div>
+
+
+    <script>
+        // Variáveis globais para armazenar os últimos resultados
+        let ultimoServico = "";
+        let ultimaDuracao = "";
+        let ultimoValorTotal = 0;
+
+        function calcularValor() {
+            // 1. Coletar os valores de entrada
+            const valorHora = parseFloat(document.getElementById('valorHora').value);
+            const horaInicioStr = document.getElementById('horaInicio').value;
+            const horaFimStr = document.getElementById('horaFim').value;
+            const servico = document.getElementById('servicoPrestado').value.trim();
+
+            const resultadoDiv = document.getElementById('resultado');
+            const duracaoDiv = document.getElementById('duracao');
+
+            // Validação
+            if (isNaN(valorHora) || !horaInicioStr || !horaFimStr || valorHora <= 0 || !servico) {
+                resultadoDiv.innerHTML = "ERRO: Por favor, preencha o serviço, o valor/hora e os horários corretamente.";
+                duracaoDiv.innerHTML = "";
+                // Limpa variáveis globais em caso de erro
+                ultimoValorTotal = 0;
+                ultimoServico = "";
+                ultimaDuracao = "";
+                return;
+            }
+
+            // 2. Converter horas (HH:MM) para minutos totais
+            function converterParaMinutos(horaStr) {
+                const [horas, minutos] = horaStr.split(':').map(Number);
+                return (horas * 60) + minutos;
+            }
+
+            let minutosInicio = converterParaMinutos(horaInicioStr);
+            let minutosFim = converterParaMinutos(horaFimStr);
+
+            // Ajustar se a hora de fim for "no dia seguinte"
+            if (minutosFim < minutosInicio) {
+                minutosFim += 24 * 60;
+            }
+
+            // 3. Calcular a diferença em minutos e horas decimais
+            const totalMinutos = minutosFim - minutosInicio;
+            const totalHorasDecimais = totalMinutos / 60;
+
+            // 4. Calcular o valor total
+            const valorTotal = valorHora * totalHorasDecimais;
+
+            // 5. Formatar a duração para exibição (H:MM)
+            const horas = Math.floor(totalMinutos / 60);
+            const minutos = totalMinutos % 60;
+            const duracaoFormatada = `${horas} hora(s) e ${minutos} minuto(s)`;
+            const horasDecimaisFormatadas = totalHorasDecimais.toFixed(2);
+            
+            // Armazenar variáveis globais para o relatório
+            ultimoServico = servico;
+            ultimaDuracao = duracaoFormatada;
+            ultimaHorasDecimais = horasDecimaisFormatadas;
+            ultimoValorTotal = valorTotal;
+
+            // 6. Exibir os resultados
+            duracaoDiv.innerHTML = `**Duração:** ${duracaoFormatada} (${horasDecimaisFormatadas} horas)`;
+            resultadoDiv.innerHTML = `**Valor Total a Cobrar:** R\$ ${valorTotal.toFixed(2).replace('.', ',')}`;
+        }
+
+        function limparDados() {
+            // Limpa os campos do formulário
+            document.getElementById('servicoPrestado').value = "";
+            document.getElementById('valorHora').value = "";
+            document.getElementById('horaInicio').value = "";
+            document.getElementById('horaFim').value = "";
+
+            // Limpa os resultados na tela
+            document.getElementById('duracao').innerHTML = "";
+            document.getElementById('resultado').innerHTML = "Aguardando cálculo...";
+            
+            // Limpa o relatório
+            document.getElementById('relatorio').innerHTML = `
+                <h3>Relatório de Cobrança</h3>
+                <p>Preencha os dados e clique em "Gerar Relatório de Cobrança" para visualizar o resumo.</p>
+            `;
+
+            // Limpa variáveis globais
+            ultimoValorTotal = 0;
+            ultimoServico = "";
+            ultimaDuracao = "";
+            ultimaHorasDecimais = "";
+        }
+
+        function gerarRelatorio() {
+            // Garante que o cálculo mais recente foi feito
+            calcularValor(); 
+
+            const relatorioDiv = document.getElementById('relatorio');
+
+            if (ultimoValorTotal > 0) {
+                const valorHora = parseFloat(document.getElementById('valorHora').value).toFixed(2).replace('.', ',');
+                
+                relatorioDiv.innerHTML = `
+                    <h3>RELATÓRIO DO SERVIÇO E VALOR</h3>
+                    <p><span class="label-relatorio">Serviço Executado:</span> ${ultimoServico}</p>
+                    <p><span class="label-relatorio">Valor por Hora (R\$):</span> R\$ ${valorHora}</p>
+                    <p><span class="label-relatorio">Duração do Serviço:</span> ${ultimaDuracao}</p>
+                    <p><span class="label-relatorio">Total de Horas (Decimal):</span> ${ultimaHorasDecimais} horas</p>
+                    <p style="font-size: 1.4em; color: #b30000; border-top: 1px dashed #ccc; padding-top: 10px;">
+                        <span class="label-relatorio">VALOR FINAL COBRADO:</span> R\$ ${ultimoValorTotal.toFixed(2).replace('.', ',')}
+                    </p>
+                `;
+            } else {
+                relatorioDiv.innerHTML = `
+                    <h3>Relatório de Cobrança</h3>
+                    <p style="color: red;">Não foi possível gerar o relatório. Por favor, preencha todos os campos e calcule o valor.</p>
+                `;
+            }
+        }
+
+        // Executar o cálculo inicial e gerar o relatório com os valores de exemplo ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            calcularValor();
+            gerarRelatorio();
+        });
+    </script>
+
+</body>
+</html>
