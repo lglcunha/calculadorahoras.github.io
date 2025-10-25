@@ -19,6 +19,7 @@
             max-width: 600px;
             margin: 0 auto 20px auto;
         }
+        /* ... (Restante dos seus estilos originais: label, input, buttons, #resultado, #relatorio) ... */
         label {
             display: block;
             margin-bottom: 5px;
@@ -105,6 +106,26 @@
             display: inline-block;
             width: 150px; /* Alinha o conteúdo */
         }
+        
+        /* NOVO ESTILO PARA O RODAPÉ (OPACIDADE E CENTRALIZAÇÃO) */
+        .copyright {
+            /* Centralização do Bloco (igual ao .container) */
+            max-width: 600px; 
+            margin: 20px auto 0; /* Centraliza a div na horizontal */
+
+            /* Centralização do Texto */
+            text-align: center !important; 
+
+            /* Opacidade */
+            opacity: 0.6 !important; /* Transparência de 40% (Opaco em 60%) */
+            
+            /* Outros estilos de discrição */
+            font-size: 0.85em; 
+            color: #888;
+            padding-top: 10px;
+        }
+        /* FIM DO NOVO ESTILO */
+
     </style>
 </head>
 <body>
@@ -142,29 +163,11 @@
         </div>
     </div>
 
-    <style>
-    /* ... (restante do seu CSS original) ... */
-
-    /* Estilo para o Rodapé */
-    .copyright {
-        max-width: 600px;
-        margin: 20px auto 0;
-        text-align: center; 
-
-        /* COMANDOS PARA OPACIDADE E CENTRALIZAÇÃO */
-        opacity: 0.6; /* Deixa o texto 60% opaco (desbotado) */
-        
-        font-size: 0.85em; 
-        color: #888;
-        padding-top: 10px;
-    }
-</style>
-
-<div class="copyright">
-    ©2025 - Suporte TI.
-</div>
-
+    <div class="copyright">
+        ©2025 - Suporte TI.
+    </div>
     <script>
+        // ... (seu código JavaScript original) ...
         // Variáveis globais para armazenar os últimos resultados
         let ultimoServico = "";
         let ultimaDuracao = "";
