@@ -113,17 +113,16 @@
         <h2>Calculadora de Serviço por Hora</h2>
 
         <label for="servicoPrestado">Serviço Prestado:</label>
-        <input type="text" id="servicoPrestado" value="Desenvolvimento de Landing Page">
+        <input type="text" id="servicoPrestado">
 
         <label for="valorHora">Valor de 1 Hora (R\$):</label>
-        <input type="number" id="valorHora" value="150.00" step="0.01" min="0">
+        <input type="number" id="valorHora" step="0.01" min="0">
 
         <label for="horaInicio">Hora de Início:</label>
-        <input type="time" id="horaInicio" value="18:50">
+        <input type="time" id="horaInicio">
 
         <label for="horaFim">Hora de Fim:</label>
-        <input type="time" id="horaFim" value="20:20">
-
+        <input type="time" id="horaFim">
         <div class="buttons-group">
             <button id="btnCalcular" onclick="calcularValor()">Calcular Valor</button>
             <button id="btnLimpar" onclick="limparDados()">Limpar Dados</button>
@@ -260,10 +259,11 @@
             }
         }
 
-        // Executar o cálculo inicial e gerar o relatório com os valores de exemplo ao carregar a página
+        // REMOÇÃO DA CHAMADA DE FUNÇÕES AO CARREGAR A PÁGINA
         document.addEventListener('DOMContentLoaded', () => {
-            calcularValor();
-            gerarRelatorio();
+            limparDados(); // Limpa os campos e resultados ao abrir, garantindo que tudo comece zerado.
+            // As chamadas para calcularValor() e gerarRelatorio() foram removidas/substituídas
+            // para que a página inicie com os campos vazios.
         });
     </script>
 
